@@ -1,0 +1,22 @@
+// 驱动需要集成到内核树 通过 menuconfig 配置
+config NET_NDNIC
+	tristate "Network Dataplane NIC driver"
+	depends on PCI && NETDEVICES
+	select NETDEVICES
+	help
+	  Industrial NIC driver for the net_ndnic dataplane.
+	  Provides multi-queue RX/TX, MSI-X, NAPI, and XDP hooks.
+	  To compile this driver as a module, choose M here.
+
+config NET_NDNIC_AFXDP_ZC
+	bool "Enable AF_XDP zero-copy support"
+	depends on NET_NDNIC
+	help
+	  Enable zero-copy AF_XDP paths. Requires NIC firmware and
+	  driver XDP ZC support.
+
+config NET_NDNIC
+      	tristate "Network Dataplane NIC driver (Stage 0)"
+      	depends on PCI && NETDEVICES
+      	depends on LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0) || COMPILE_TEST
+      	help
