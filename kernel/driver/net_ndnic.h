@@ -5,12 +5,25 @@
 #ifndef _NET_NDNIC_H
 #define _NET_NDNIC_H
 
+/* ===== 三方（内核）依赖 ===== */
+#include <linux/version.h>        // LINUX_VERSION_CODE, KERNEL_VERSION
+#include <linux/module.h>
 #include <linux/types.h>
-#include <linux/netdevice.h>
-#include <linux/pci.h>
-#include <linux/workqueue.h>
-#include <linux/interrupt.h>
-#include <linux/ethtool.h>
+#include <linux/kernel.h>
+#include <linux/pci.h>            // pci_dev, pci_driver, BAR, DMA mask
+#include <linux/netdevice.h>      // net_device, netdev_ops, napi_struct
+#include <linux/etherdevice.h>    // eth_hw_addr_random, is_zero_ether_addr
+#include <linux/interrupt.h>      // request_irq, MSI-X, IRQ affinity
+#include <linux/ethtool.h>        // ethtool_ops, ethtool_ringparam
+#include <linux/if_link.h>        // XDP attach flags
+#include <linux/bpf.h>            // bpf_prog, XDP 返回码
+#include <linux/filter.h>         // bpf_prog 辅助接口
+#include <linux/vmalloc.h>        // 大块 Ring 分配
+#include <linux/dma-mapping.h>    // dma_alloc_coherent, dma_set_mask
+#include <linux/workqueue.h>      // struct work_struct (reset_task)
+#include <linux/timer.h>          // struct timer_list (service_timer)
+#include <net/xdp.h>              // xdp_buff, xdp_frame
+#include <net/xdp_sock_drv.h>     // AF_XDP 零拷贝辅助（如驱动原生支持）
 
 #include "net_ndnic_compat.h"
 #include "net_ndnic_phy.h"
