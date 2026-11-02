@@ -395,7 +395,12 @@ if(NDP_BUILD_APPS)
                 continue()
             endif()
             get_filename_component(_name "${_src}" NAME_WE)
-            add_executable(${_name} "${_src}")
+            add_executable(${_name} "${_src}"
+                    kernel/driver/net_ndnic_phy.c
+                    kernel/driver/net_ndnic_phy_timing.c
+                    kernel/driver/net_ndnic_phy_link.c
+                    kernel/driver/net_ndnic_phy_debug.c
+                    kernel/driver/net_ndnic_phy.h)
             target_link_libraries(${_name} PRIVATE ndp_uapi)
             if(TARGET ndp_control)
                 target_link_libraries(${_name} PRIVATE ndp_control)

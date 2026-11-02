@@ -132,3 +132,29 @@ else
     echo "==== 存在 $FAIL 项失败 ===="
     exit 1
 fi
+
+info "检查 PHY 子模块链接完整性..."
+PHY_SYMS=$(nm net_ndnic.ko 2>/dev/null | grep -cE ' nd_phy_(init|deinit|start|stop|dump_regs|link_adjust|link_recover|validate_timing|parse_timing|reset_sequence|apply_rgmii_delay|configure_downshift|inc_mdio_error|get_stats)$')
+if [[ "$PHY_SYMS" -ge 14 ]]; then
+    pass "PHY 子模块符号完整（$PHY_SYMS 个）"
+else
+    fail "PHY 子模块符号缺失（期望 ≥14，实际 $PHY_SYMS）"
+    nm net_ndnic.ko 2>/dev/null | grep ' nd_phy_' | sed 's/^/         /'
+fi
+
+# ---- 9. 主驱动关键符号 ----
+info "检查主驱动符号..."
+MAIN_SYMS=$(nm net_ndnic.ko 2>/dev/null | grep -cE \
+    ' (net_ndnic_probe|net_ndnic_remove|net_ndnic_open|net_ndnic_close|nd_change_mtu|nd_set_rx_mode|nd_tx_timeout|nd_get_stats64|nd_reset_task)$')
+if [[ "$MAIN_SYMS" -ge 9 ]]; then
+    pass "主驱动符号完整（$MAIN_SYMS 个）"
+else
+    fail "主驱动符号缺失（期望 ≥9，实际 $MAIN_SYMS）"
+fi
+
+# ---- 10. pci_driver 注册检查 ----
+if nm net_ndnic.ko 2>/dev/null | grep -q ' T init_module\| t nd_driver'; then
+    pass "pci_driver 已注册"
+else
+    fail "pci_driver 未注册"
+fi

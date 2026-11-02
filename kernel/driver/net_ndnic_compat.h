@@ -97,4 +97,70 @@ static inline bool nd_afxdp_zc_supported(struct net_device *ndev)
 }
 #endif
 
+/*
+ * ---------------------------------------------------------------------------
+ * PHY: EEE 禁用
+ * ---------------------------------------------------------------------------
+ * 6.5 起 phydev 用 eee_enabled/advertising_eee；旧内核直接写 MDIO_AN_EEE_ADV。
+ * 驱动只调用 nd_phy_disable_eee_internal()，不直接碰这些字段。
+ */
+static inline void nd_phy_disable_eee_internal(struct phy_device *phydev)
+{
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 5, 0)
+    phydev->eee_enabled = false;
+    linkmode_zero(phydev->advertising_eee);
+#else
+    /* 对所有支持 EEE 的 MMD 写 0；失败不影响主流程 */
+    phy_write_mmd(phydev, MDIO_MMD_AN, MDIO_AN_EEE_ADV, 0);
+#endif
+}
+
+/*
+ * ---------------------------------------------------------------------------
+ * PHY: downshift
+ * ---------------------------------------------------------------------------
+ * 6.1 起 phydev->downshift 是标准字段；旧内核返回 -EOPNOTSUPP，
+ * 由板级配置决定是否走 nd_phy_configure_downshift() 的寄存器写回退。
+ */
+static inline int nd_phy_set_downshift(struct phy_device *phydev, u32 count)
+{
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 0)
+    phydev->downshift = count;
+    return 0;
+#else
+    return -EOPNOTSUPP;
+#endif
+}
+
+/*
+ * ---------------------------------------------------------------------------
+ * PHY: 速率上限
+ * ---------------------------------------------------------------------------
+ */
+static inline int nd_phy_set_max_speed(struct phy_device *phydev, u32 speed)
+{
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)
+    return phy_set_max_speed(phydev, speed);
+#else
+    return 0;
+#endif
+}
+/*
+ * ---------------------------------------------------------------------------
+ * MAC 地址：eth_hw_addr_set 5.17 起引入
+ * ---------------------------------------------------------------------------
+ */
+static inline void nd_eth_hw_addr_set(struct net_device *ndev, const u8 *addr)
+{
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 17, 0)
+    eth_hw_addr_set(ndev, addr);
+#else
+    memcpy(ndev->dev_addr, addr, ETH_ALEN);
+#endif
+}
+
+
+
+
 #endif /* _NET_NDNIC_COMPAT_H */
+

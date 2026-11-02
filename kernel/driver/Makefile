@@ -24,7 +24,11 @@ net_ndnic-objs := \
     net_ndnic_ring.o \
     net_ndnic_xdp.o \
     net_ndnic_ethtool.o \
-    net_ndnic_stats.o
+    net_ndnic_stats.o \
+    net_ndnic_phy.o \
+    net_ndnic_phy_timing.o \
+    net_ndnic_phy_link.o \
+    net_ndnic_phy_debug.o
 
 # XDP 内核程序不进入 Kbuild；由 kernel/xdp/Makefile 独立编译
 # 这里只声明依赖关系，避免误将 nd_xdp_kern.c 当作内核模块源文件
